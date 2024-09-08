@@ -1,0 +1,296 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/11892/11892629.png" crossorigin="anonymous">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web Scraper</title>
+    <style>
+        :root {
+            --bg-color: #e0e5ec;
+            --text-color: #4a4a4a;
+            --shadow-light: #ffffff;
+            --shadow-dark: #a3b1c6;
+        }
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: baseline;
+            height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .container {
+            width: 100%;
+            max-width: 900px;
+            gap: 40px;
+            display: grid;
+        }
+        h1 {
+            text-align: center;
+            margin: 0;
+            font-weight: 300;
+            letter-spacing: 2px;
+        }
+        .neumorphic {
+            display: flex;
+            gap: 20px;
+            background: var(--bg-color);
+            border-radius: 15px;
+            box-shadow: 5px 5px 15px var(--shadow-dark), -5px -5px 15px var(--shadow-light);
+            padding: 20px;
+            transition: all 0.3s ease;
+            max-width: -webkit-fill-available;
+        }
+        .neumorphic:hover {
+            box-shadow: 8px 8px 20px var(--shadow-dark), -8px -8px 20px var(--shadow-light);
+        }
+        input, button, textarea {
+            width: 100%;
+            border: none;
+            outline: none;
+            font-size: 16px;
+        }
+        input {
+            background: var(--bg-color);
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: inset 3px 3px 7px var(--shadow-dark), inset -3px -3px 7px var(--shadow-light);
+        }
+        button {
+            background: var(--bg-color);
+            color: var(--text-color);
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 5px 5px 10px var(--shadow-dark), -5px -5px 10px var(--shadow-light);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            max-width: 100px;
+            cursor: pointer;
+        }
+        button:hover {
+            box-shadow: 3px 3px 5px var(--shadow-dark), -3px -3px 5px var(--shadow-light);
+        }
+        button:active {
+            box-shadow: inset 3px 3px 5px var(--shadow-dark), inset -3px -3px 5px var(--shadow-light);
+        }
+        textarea {
+            height: calc(100vh - 320px);
+            background: var(--bg-color);
+            /* padding: 15px; */
+            border-radius: 10px;
+            box-shadow: inset 3px 3px 7px var(--shadow-dark), inset -3px -3px 7px var(--shadow-light);
+            resize: none;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        .pulse {
+            animation: pulse 1.7s infinite;
+        }
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .copy-btn {
+            font-size: 14px;
+            padding: 5px 10px;
+            margin-bottom: 16px;
+        }
+        #resultOutput {
+            display: grid;
+            grid-template-rows: auto 1fr auto;
+        }
+
+        #textOutput, #linksOutput {
+            height: 20vh;
+        }
+        h3 {
+            margin: 0;
+        }
+        .accordion-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .accordion-toggle {
+            background: none;
+            border: none;
+            font-size: 18px;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+            max-width: 60px;
+            padding: 12px;
+        }
+
+        .accordion-content {
+            display: none;
+            padding-top: 10px;
+        }
+
+        .accordion.active .accordion-content {
+            display: block;
+        }
+
+        .accordion.active .accordion-toggle {
+            transform: rotate(180deg);
+        }
+
+        .margin-0 {
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Web Scraper</h1>
+        <form id="scrapeForm" class="neumorphic">
+            <input type="url" id="urlInput" placeholder="Enter URL to scrape" required>
+            <button type="submit">Scrape</button>
+        </form>
+        <div id="resultOutput" class="neumorphic">
+            <div class="result-block">
+                <div class="result-header">
+                    <h3 id="resultHeader">Results</h3>
+                    <button id="copyAllBtn" class="copy-btn margin-0">Copy Data</button>
+                </div>
+                <p><strong>Title:</strong> <span id="titleOutput"></span></p>
+            </div>
+            <div class="result-block accordion" id="textOutputBlock">
+                <div class="accordion-header">
+                    <h3>Text</h3>
+                    <button class="accordion-toggle">▼</button>
+                </div>
+                <div class="accordion-content">
+                    <button class="copy-btn" data-target="textOutput">Copy</button>
+                    <textarea id="textOutput" readonly></textarea>
+                </div>
+            </div>
+            <div class="result-block accordion">
+                <div class="accordion-header">
+                    <h3>Links</h3>
+                    <button class="accordion-toggle">▼</button>
+                </div>
+                <div class="accordion-content">
+                    <button class="copy-btn" data-target="linksOutput">Copy</button>
+                    <textarea id="linksOutput" readonly></textarea>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        let scrapedData = {};
+
+        function setupEventListeners() {
+            document.getElementById('scrapeForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const url = document.getElementById('urlInput').value.trim();
+                const resultOutput = document.getElementById('resultOutput');
+                const resultHeader = document.getElementById('resultHeader');
+                const titleOutput = document.getElementById('titleOutput');
+                const textOutput = document.getElementById('textOutput');
+                const linksOutput = document.getElementById('linksOutput');
+                const textOutputBlock = document.getElementById('textOutputBlock');
+                const submitButton = document.querySelector('button[type="submit"]');
+                
+                console.log('Submitting form with URL:', url);
+                resultHeader.textContent = 'Scraping...';
+                resultOutput.classList.add('pulse');
+                textOutput.value = '';
+                linksOutput.value = '';
+                submitButton.classList.add('pulse');
+                
+                try {
+                    const response = await fetch('/scrape', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ url }),
+                    });
+                    const content = await response.json();
+                    console.log('Received content:', content);
+                    
+                    if (content.error) {
+                        throw new Error(content.error);
+                    }
+                    
+                    scrapedData = { url, output: content };
+                    
+                    titleOutput.textContent = content.title;
+                    textOutput.value = content.text;
+                    linksOutput.value = JSON.stringify(content.links, null, 2);
+                } catch (error) {
+                    console.error('Error in form submit handler:', error);
+                    titleOutput.textContent = `Error: ${error.message}`;
+                    textOutput.value = '';
+                    linksOutput.value = '';
+                    scrapedData = {};
+                } finally {
+                    submitButton.classList.remove('pulse');
+                    resultHeader.textContent = 'Results';
+                    textOutputBlock.classList.add('active');
+                    resultOutput.classList.remove('pulse');
+                }
+            });
+
+            // Copy to clipboard functionality
+            document.querySelectorAll('.copy-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const targetId = btn.getAttribute('data-target');
+                    const targetElement = document.getElementById(targetId);
+                    navigator.clipboard.writeText(targetElement.value).then(() => {
+                        btn.textContent = 'Copied!';
+                        setTimeout(() => {
+                            btn.textContent = 'Copy';
+                        }, 2000);
+                    }).catch(err => {
+                        console.error('Failed to copy: ', err);
+                    });
+                });
+            });
+
+            // Copy all data functionality
+            document.getElementById('copyAllBtn').addEventListener('click', () => {
+                const formattedData = JSON.stringify(scrapedData);
+                navigator.clipboard.writeText(formattedData).then(() => {
+                    const copyAllBtn = document.getElementById('copyAllBtn');
+                    copyAllBtn.textContent = 'Copied!';
+                    setTimeout(() => {
+                        copyAllBtn.textContent = 'Copy Data';
+                    }, 2000);
+                }).catch(err => {
+                    console.error('Failed to copy: ', err);
+                });
+            });
+
+            // Accordion functionality
+            document.querySelectorAll('.accordion-header').forEach(header => {
+                header.addEventListener('click', () => {
+                    const accordion = header.closest('.accordion');
+                    accordion.classList.toggle('active');
+                });
+            });
+        }
+
+        // Run setup when the DOM is fully loaded
+        document.addEventListener('DOMContentLoaded', setupEventListeners);
+    </script>
+</body>
+</html>
